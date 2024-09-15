@@ -64,65 +64,9 @@ service /DSA\-PROJECT on new http:Listener(9090) {
         }
         return program;
     }
-
-    resource function add Program(program Program) returns Program | error? {
-        programs[program.programCode] = program;
-        return program;
-    }
-
     resource function get AllPrograms() returns Program[] | error? {
         return programs.toArray();
     }
-
-    resource function update Program(programCode string, program Program) returns Program | error? {
-        if programs[programCode] is () {
-            return error("Program not found");
-        }
-            if courses[course.courseCode] is () {
-                return error("Course '${course.courseCode}' not found");
-            }
-
-        programs[programCode] = program;
-        return program;
-    }
-    
-
-    resource function delete Program(string programCode ) returns boolean | error? {
-        if programs[programCode] is () {
-            return error("Program not found");
-        }
-        delete programs[programCode];
-        return true;
-    }
-
-    resource function getProgramsDueForReview() returns Program[] | error? {
-        programsDueForReview = programs.filter(p => p.registrationDate < time:dateFrom(year: 2024, month: 1, day: 1));
-        return programsDueForReview.toArray();
-    }
-
-    resource function getProgramsByFaculty(string faculty ) returns Program[] | error? {
-        programsByFaculty = programs.filter(p => p.faculty == faculty);
-        return programsByFaculty.toArray();
-    }
-
-    resource function addCourse( string programCode , course Course) returns Program | error? {
-        Program? program = programs[programCode];
-        if program is () {
-            return error("Program not found");
-        }
-
-        program.courses = program.courses + [course];
-        programs[programCode] = program;
-        return program;
-    }
-
-    resource function getCourse[string courseCode]() returns Course | CourseNotFound | error? {
-        Course? course = courses[courseCode];
-        if course is () {
-           return http:NOT_FOUND; 
-} else {
-return course;
-}
 }
 
 
