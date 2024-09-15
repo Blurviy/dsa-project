@@ -87,7 +87,7 @@ service /DSA\-PROJECT on new http:Listener(9090) {
     }
     
 
-    resource function delete Program(programCode string) returns boolean | error? {
+    resource function delete Program(string programCode ) returns boolean | error? {
         if programs[programCode] is () {
             return error("Program not found");
         }
@@ -100,12 +100,12 @@ service /DSA\-PROJECT on new http:Listener(9090) {
         return programsDueForReview.toArray();
     }
 
-    resource function getProgramsByFaculty(faculty string) returns Program[] | error? {
+    resource function getProgramsByFaculty(string faculty ) returns Program[] | error? {
         programsByFaculty = programs.filter(p => p.faculty == faculty);
         return programsByFaculty.toArray();
     }
 
-    resource function addCourse(programCode string, course Course) returns Program | error? {
+    resource function addCourse( string programCode , course Course) returns Program | error? {
         Program? program = programs[programCode];
         if program is () {
             return error("Program not found");
@@ -116,16 +116,18 @@ service /DSA\-PROJECT on new http:Listener(9090) {
         return program;
     }
 
-    resource function getCourse(courseCode string) returns Course | CourseNotFound | error? {
+    resource function getCourse[string courseCode]() returns Course | CourseNotFound | error? {
         Course? course = courses[courseCode];
         if course is () {
-            CourseNotFound errorDetails = {
-                message: "Course not found",
-                details: "courseCode: ${courseCode}"
-            };
-            return errorDetails;
-        }
-        return course;
-    }
+           return http:NOT_FOUND; 
+} else {
+return course;
 }
+}
+
+
+
+     
+ 
+
 
