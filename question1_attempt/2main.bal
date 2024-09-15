@@ -49,7 +49,7 @@ type CourseNotFound record {|
 |};
 
 service /DSA\-PROJECT on new http:Listener(9090) {
-     resource function get programs() returns Program[] | error {
+    resource function get programs() returns Program[] | error {
         return programs.toArray();
     }
 
@@ -61,14 +61,27 @@ service /DSA\-PROJECT on new http:Listener(9090) {
                 details: "programCode: ${programCode}"
             };
             return errorDetails;
-        }
+        } else {
         return program;
-    }
+    } }
     resource function get AllPrograms() returns Program[] | error? {
         return programs.toArray();
-    }
-}
+    } 
 
+ resource function get Course(string courseCode ) returns Course | CourseNotFound | error? {
+        Course? course = courses[courseCode];
+        if course is () { 
+            CourseNotFound errorDetails = {
+               body: { message: "Course not found",
+                details: "courseCode: ${courseCode}" }
+                
+             };
+            return errorDetails; 
+        } else {
+        return course; }
+    
+ }
+}
 
 
      
