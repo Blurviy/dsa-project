@@ -44,11 +44,10 @@ type ProgramNotFound record {|
     ErrorDetails body;
 |};
 
-type CourseNotFound record {|
-    ErrorDetails body;
-|};
+
 
 service /DSA\-PROJECT on new http:Listener(9090) {
+
 //Retrieve the details of a specific programme by their programme code.
     resource function get programs/[string programCode]() returns Program | ErrorDetails | error {
         Program? program = programs[programCode];
@@ -61,10 +60,24 @@ service /DSA\-PROJECT on new http:Listener(9090) {
         } else {
         return program;
     } }
-//return all programs
+//getting all programs
     resource function get AllPrograms() returns Program[] | error? {
         return programs.toArray();
     } 
+resource function get ProgramsByFaculty(string faculty) returns table<Program> key<string>|ErrorDetails {
+    table<Program> key<string> programsByFaculty = programs.filter(p => p.faculty == faculty);
+
+//getting programs within a faculty
+    if programsByFaculty.length() == 0 {
+        ErrorDetails errorDetails = {
+            message: "No programs found for faculty ",
+            details: "faculty: ${faculty}"
+        };
+        return errorDetails;
+    } else {
+        return programsByFaculty;
+    }
+}
 }
 
 
