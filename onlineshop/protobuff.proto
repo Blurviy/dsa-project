@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package onlineshop;
+
+/*mplementing the service
+// Define the shopping service with all required operations*/
+service onlineshopService {
+    rpc AddProduct(Product) returns (ProductResponse);
+    rpc CreateUsers(stream User) returns (UsersResponse);
+    rpc UpdateProduct(UpdateProductRequest) returns (ProductResponse);
+    rpc RemoveProduct(RemoveProductRequest) returns (ProductListResponse);
+    rpc ListAvailableProducts(Empty) returns (ProductListResponse);
+    rpc SearchProduct(SearchProductRequest) returns (ProductResponse);
+    rpc AddToCart(AddToCartRequest) returns (CartResponse);
+    rpc PlaceOrder(PlaceOrderRequest) returns (OrderResponse);
+}
+
+// Message for an empty request/response
+message Empty {}
+
+// Message for representing a product
+message Product {
+    string name = 1;
+    string description = 2;
+    float price = 3;
+    int32 stock_quantity = 4;
+    string sku = 5;
+    ProductStatus status = 6;
+}
+
+// Enum for product status
+enum ProductStatus {
+    PRODUCT_STATUS_UNSPECIFIED = 0;
+    PRODUCT_STATUS_AVAILABLE = 1;
+    PRODUCT_STATUS_OUT_OF_STOCK = 2;
+}
+
+// Message for user details
+message User {
+    string user_id = 1;
+    string name = 2;
+    UserType type = 3;
+}
+
+// Enum for user type
+enum UserType {
+    USER_TYPE_UNSPECIFIED = 0;
+    USER_TYPE_CUSTOMER = 1;
+    USER_TYPE_ADMIN = 2;
+}
+
+// Response after adding a product
+message ProductResponse {
+    string sku = 1;
+    Product product = 2;
+}
+
+// Response for created users
+message UsersResponse {
+    int32 created_count = 1;
+}
+
+// Request to update a product
+message UpdateProductRequest {
+    string sku = 1;
+    Product product = 2;
+}
+
+// Request to remove a product
+message RemoveProductRequest {
+    string sku = 1;
+}
+
+// Response with a list of products
+message ProductListResponse {
+    repeated Product products = 1;
+}
+
+// Request to search for a product
+message SearchProductRequest {
+    string sku = 1;
+}
+
+// Request to add a product to a cart
+message AddToCartRequest {
+    string user_id = 1;
+    string sku = 2;
+    int32 quantity = 3;
+}
+
+// Response with the cart details
+message CartResponse {
+    repeated CartItem items = 1;
+}
+
+// Message for representing an item in the cart
+message CartItem {
+    string sku = 1;
+    int32 quantity = 2;
+}
+
+// Request to place an order
+message PlaceOrderRequest {
+    string user_id = 1;
+}
+
+// Response with order details
+message OrderResponse {
+    string order_id = 1;
+    repeated CartItem items = 2;
+    float total_price = 3;
+}
