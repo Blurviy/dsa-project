@@ -1,38 +1,70 @@
 import ballerina/io;
 import ballerina/grpc;
+import ballerina/time;
 
 type Product record {
-    string name;
-    string description;
-    float price;
-    int stockQuantity;
     string sku;
+    string name;
     boolean available;
 };
 
 type Order record {
-    string orderId;
-    string productId;
-    int quantity;
-    float price;
+    string order_id;
+    string user_id;
+    Product[] products;
     string status;
 };
 
-type Cart record {
-    string cartId;
-    string userId;
+type ProductResponse record {
+    string message;
+    Product? product = ();
+};
+
+type ProductListResponse record {
     Product[] products;
 };
 
+type ProductSKU record {
+    string sku;
+};
+
+type UpdateProductRequest record {
+    string sku;
+    Product product;
+};
+
+type AddToCartRequest record {
+    string user_id;
+    string sku;
+};
+
+type CartResponse record {
+    string message;
+    Product[] cart_items;
+};
+
+type OrderResponse record {
+    string message;
+    Order? order = ();
+};
+
+type UserID record {
+    string user_id;
+};
+
+type Empty record {};
 
 service class ShopService {
-   
-    resource function AddProduct(Product product) returns ProductResponse {
+    private map<string, Product> products = {};
+    private map<string, Order> orders = {};
+    private map<string, Product[]> carts = {};
+
+    resource function post AddProduct(Product product) returns ProductResponse {
         self.products[product.sku] = product;
         return {message: "Product added successfully", product: product};
     }
 
-    resource function UpdateProduct(UpdateProductRequest req) returns ProductResponse {
+    resource function put UpdateProduct(UpdateProductRequest req) returns ProductResponse {
         if self.products.hasKey(req.sku) {
             self.products[req.sku] = req.product;
             return {message: "Product updated successfully", product: req.product};
@@ -40,54 +72,49 @@ service class ShopService {
         return {message: "Product not found"};
     } 
 
-    resource function RemoveProduct(ProductSKU sku) returns ProductListResponse {
+    resource function delete RemoveProduct(ProductSKU sku) returns ProductListResponse {
         self.products.remove(sku.sku);
         return {products: self.getAvailableProducts()};
     }
 
-    resource function ListAvailableProducts(Empty empty) returns ProductListResponse {
+    resource function get ListAvailableProducts(Empty empty) returns ProductListResponse {
         return {products: self.getAvailableProducts()};
     }
 
-    resource function SearchProduct(ProductSKU sku) returns ProductResponse {
-        Product? product = {
-    name: "ballerina",
-    description: "ballerina",
-    price: 1.0,
-    stockQuantity: 1,
-    sku: "ballerina",
-    available: true
-};
-
+    resource function get SearchProduct(ProductSKU sku) returns ProductResponse {
+        Product? product = self.products[sku.sku];
         if product is Product {
             return {message: "Product found", product: product};
         }
         return {message: "Product not found"};
     }
 
-    resource function AddToCart(AddToCartRequest req) returns CartResponse {
+    resource function post AddToCart(AddToCartRequest req) returns CartResponse {
         if !self.products.hasKey(req.sku) {
             return {message: "Product not found"};
         }
 
         Product product = self.products[req.sku];
-        carts[req.user_id].push(product);
+        if !self.carts.hasKey(req.user_id) {
+            self.carts[req.user_id] = [];
+        }
+        self.carts[req.user_id].push(product);
 
-        return {message: "Product added to cart", cart_items: carts[req.user_id]};
+        return {message: "Product added to cart", cart_items: self.carts[req.user_id]};
     }
 
-    resource function PlaceOrder(UserID id) returns OrderResponse {
-        if carts.hasKey(id.user_id) {
+    resource function post PlaceOrder(UserID id) returns OrderResponse {
+        if self.carts.hasKey(id.user_id) {
             string orderId = "ORD" + id.user_id + time:currentTime().toString();
             Order order = {
                 order_id: orderId,
                 user_id: id.user_id,
-                products: carts[id.user_id],
+                products: self.carts[id.user_id],
                 status: "Pending"
             };
 
-            orders[orderId] = order;
-            carts.remove(id.user_id);
+            self.orders[orderId] = order;
+            self.carts.remove(id.user_id);
 
             return {message: "Order placed successfully", order: order};
         }
@@ -102,11 +129,25 @@ service class ShopService {
 }
 
 service /shop on new grpc:Listener(9090) {
-    isolated resource function 'AddProduct(Product product) returns ProductResponse;
-    isolated resource function 'UpdateProduct(UpdateProductRequest req) returns ProductResponse;
-    isolated resource function 'RemoveProduct(ProductSKU sku) returns ProductListResponse;
-    isolated resource function 'ListAvailableProducts(Empty empty) returns ProductListResponse;
-    isolated resource function 'SearchProduct(ProductSKU sku) returns ProductResponse;
-    isolated resource function 'AddToCart(AddToCartRequest req) returns CartResponse;
-    isolated resource function 'PlaceOrder(UserID id) returns OrderResponse;
+    resource function post AddProduct(Product product) returns ProductResponse {
+        return self.AddProduct(product);
+    }
+    resource function put UpdateProduct(UpdateProductRequest req) returns ProductResponse {
+        return self.UpdateProduct(req);
+    }
+    resource function delete RemoveProduct(ProductSKU sku) returns ProductListResponse {
+        return self.RemoveProduct(sku);
+    }
+    resource function get ListAvailableProducts(Empty empty) returns ProductListResponse {
+        return self.ListAvailableProducts(empty);
+    }
+    resource function get SearchProduct(ProductSKU sku) returns ProductResponse {
+        return self.SearchProduct(sku);
+    }
+    resource function post AddToCart(AddToCartRequest req) returns CartResponse {
+        return self.AddToCart(req);
+    }
+    resource function post PlaceOrder(UserID id) returns OrderResponse {
+        return self.PlaceOrder(id);
+    }
 }
