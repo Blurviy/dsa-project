@@ -1,11 +1,32 @@
 import ballerina/io;
 import ballerina/grpc;
 
-service class ShopService {
-    private map<string, Product> products = {};
-    private map<string, Order> orders = {};
-    private map<string, Product[]> carts = {};
+type Product record {
+    string name;
+    string description;
+    float price;
+    int stockQuantity;
+    string sku;
+    boolean available;
+};
 
+type Order record {
+    string orderId;
+    string productId;
+    int quantity;
+    float price;
+    string status;
+};
+
+type Cart record {
+    string cartId;
+    string userId;
+    Product[] products;
+};
+
+
+service class ShopService {
+   
     resource function AddProduct(Product product) returns ProductResponse {
         self.products[product.sku] = product;
         return {message: "Product added successfully", product: product};
@@ -29,7 +50,15 @@ service class ShopService {
     }
 
     resource function SearchProduct(ProductSKU sku) returns ProductResponse {
-        Product? product = self.products[sku.sku];
+        Product? product = {
+    name: "ballerina",
+    description: "ballerina",
+    price: 1.0,
+    stockQuantity: 1,
+    sku: "ballerina",
+    available: true
+};
+
         if product is Product {
             return {message: "Product found", product: product};
         }
