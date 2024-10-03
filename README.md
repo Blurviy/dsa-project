@@ -83,6 +83,13 @@ cd client/
 ```bash
 bal run
 ```
+
+## Technologies Used
+
+- [**Ballerina Language:**](https://ballerina.io/learn/write-a-restful-api-with-ballerina/) For building the RESTful API service.
+
+- [**HTTP Methods:**](https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/HTTP-methods) `GET`, `POST`, `PUT`, `DELETE` for respective CRUD operations.
+
 ## Authors
 
 - [@Blurviy](https://github.com/Blurviy)
@@ -90,13 +97,4 @@ bal run
 - [@EclipseRav](https://github.com/EclipseRav)
 - [@libang01](https://github.com/libang01)
 - [@Saya2003](https://github.com/Saya2003)
-## Technologies Used
 
-- [**Ballerina Language:**](https://ballerina.io/learn/write-a-restful-api-with-ballerina/) For building the RESTful API service.
-
-- [**HTTP Methods:**](https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/HTTP-methods) `GET`, `POST`, `PUT`, `DELETE` for respective CRUD operations.
-## Technologies Used
-
-- [**Ballerina Language:**](https://ballerina.io/learn/write-a-restful-api-with-ballerina/) For building the RESTful API service.
-
-- [**HTTP Methods:**](https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/HTTP-methods) `GET`, `POST`, `PUT`, `DELETE` for respective CRUD operations.
