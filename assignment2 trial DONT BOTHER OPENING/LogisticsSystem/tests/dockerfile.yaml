@@ -1,0 +1,9 @@
+FROM openjdk:17-alpine
+
+COPY . /app
+
+WORKDIR /app
+
+RUN ballerina build
+
+ENTRYPOINT ["ballerina", "run", "main.bal"]
